@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>spuListPage</title>
+</head>
+<body>
+    <div class="easyui-panel" title=""  data-options="border:true">
+        <!-----------------列表 ----------------------------->
+        <table id="spulist_dg" class="easyui-datagrid" title="spu列表"
+               data-options="singleSelect:true,method:'get' ,toolbar:'#spulist_tb'">
+            <thead>
+            <tr>
+                <th data-options="field:'id'" width="10%">商品id </th>
+                <th data-options="field:'spuName'" width="30%">商品名称</th>
+                <th data-options="field:'description'" width="60%">商品描述 </th>
+            </tr>
+            </thead>
+        </table>
+        <!-----------------列表的工具栏----------------------------->
+        <div id="spulist_tb" style="padding:5px;height:auto">
+            <div style="margin-bottom:5px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addSpuInfo()">添加</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editSpuInfo()">编辑</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="removeSpuInfo()">删除</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addSkuInfo()">增加sku</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="showSkuInfoList()"> sku列表</a>
+            </div>
+            <div>
+                一级分类：
+                <select id="ctg1ForSpuList"   class="easyui-combobox"   style="width:100px" data-options="valueField:'id',textField:'name',url:'getCatalog1',
+                onSelect:function(rec){
+                $('#ctg2ForSpuList').combobox('clear');
+                $('#ctg3ForSpuList').combobox('clear');
+
+                        $('#ctg2ForSpuList').combobox('reload','getCatalog2?catalog1Id='+rec.id);
+                   }"  ></select>
+                二级分类：
+                <select name="ctg2ForSpuList" id="ctg2ForSpuList"  class="easyui-combobox" data-options="valueField:'id',textField:'name',
+               onSelect:function(rec){
+                $('#ctg3ForSpuList').combobox('clear');
+                        $('#ctg3ForSpuList').combobox('reload','getCatalog3?catalog2Id='+rec.id);
+                   }"    style="width:100px" ></select>
+                三级分类：
+                <select name="ctg3ForSpuList" id="ctg3ForSpuList"  class="easyui-combobox" data-options="valueField:'id',textField:'name',
+                onSelect:function(rec){
+                       $('#spulist_dg').datagrid({
+                       url:'spuListByCatalog3IdPage?catalog3Id='+rec.id,
+                       dataType:'JSONP',
+                        rownumbers: true,
+                        singleSelect: true,
+                        pagination: true,
+                        idField: 'id',
+                        fitColumns: true,
+
+                        nowarp: false,
+                        border: false,
+                        pageSize: 5,
+                        pageList: [5, 10]
+                       });
+                   }
+    "    style="width:100px" ></select>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search"  onclick="javascript:reloadSpuList()"  >刷新列表</a>
+            </div>
+        </div>
+    </div>
+
+    <!--引用一个外部spuInfoPage页面代码-->
+    <div th:include="spuInfoPage"></div>
+    <div th:include="skulistPage"></div>
+    <div th:include="skuInfoPage"></div>
+
+    <script language="JavaScript">
+        //点击添加按钮执行的操作
+        function addSpuInfo() {
+
+            var booleanVal = checkCatalog3();
+            if(!booleanVal){
+                return ;
+            }
+            //打开对话框
+            $("#spu_dlg").dialog("open");
+            //初始化spu对话框中的控件
+            initSpuInfoDlg();
+        }
+        //检查是否有三级分类
+        function checkCatalog3(){
+            var catalog3Value = $("#ctg3ForSpuList").combobox("getValue");
+            if(catalog3Value == ''){
+                $.messager.alert('警告','请先选择三级分类','warning');
+                return false;
+            }
+            return true;
+        }
+        //刷新列表
+        function reloadSpuList() {
+            //获取三级分类id
+            var catalog3Id = $("#ctg3ForSpuList").combobox("getValue");
+            // 根据id加载属性
+            $("#spulist_dg").datagrid({
+                url:"spuListByCatalog3IdPage?catalog3Id="+catalog3Id
+            });
+        }
+
+        //sku列表按钮
+        function showSkuInfoList() {
+            var row = $('#spulist_dg').datagrid('getSelected');
+            //检查是否选中编辑的行
+            if(!row){
+                $.messager.alert('警告','请选择要编辑的行','warning');
+                return false;
+            }
+            //检查是否有三级分类
+            checkCatalog3();
+            //弹出skulist的对话框
+            $("#skulist_dlg").dialog("open");
+            var spu = $("#spulist_dg").datagrid("getSelected");
+            //初始化sku列表
+            initSkuListDlg(spu);
+        }
+        
+        //sku添加功能
+        function addSkuInfo() {
+            var row = $('#spulist_dg').datagrid('getSelected');
+            //检查是否选中编辑的行
+            if(!row){
+                $.messager.alert('警告','请选择要编辑的行','warning');
+                return false;
+            }
+            //检查是否有三级分类
+            checkCatalog3();
+            $("#sku_dlg").dialog("open")
+
+            //在skuInfoPage.html中
+            initSkuInfoDlg();
+
+        }
+        //删除功能
+        function removeSpuInfo() {
+            var row = $('#spulist_dg').datagrid('getSelected');
+            //检查是否选中编辑的行
+            if(!row){
+                $.messager.alert('警告','请选择要编辑的行','warning');
+                return false;
+            }
+            var selected = $("#spulist_dg").datagrid("getSelected");
+            var row = selected.id;
+            var rowName = selected.spuName;
+            $.messager.confirm('确认对画框','你确定要删除【"' + rowName + '"】吗？',function (r) {
+                if(r){
+                    $.post("deletSupInfo",{id:row},function(data){
+                        $.messager.alert('消息',data,'info');
+                        setTimeout(function(){
+                            $(".messager-body").window('close');
+                        },1000);
+
+                    })
+                    //清空已选择的行
+                    $('#dg').datagrid('clearSelections');
+                    //重新加载
+                    reloadSpuList();
+
+                }
+            })
+        }
+    </script>
+</body>
+</html>

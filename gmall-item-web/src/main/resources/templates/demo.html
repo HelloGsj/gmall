@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div>跳转页面</div>
+    <br/>
+    <div th:text="${divText}">哈哈哈</div>
+    <br/>
+    <input th:value="${inputValue}" type="text" />
+    <br/>
+    <select >
+       <option class="optionClass" th:each="list:${lists}" th:name="list">aaa</option>
+    </select>
+        <input id="inputId" type="submit" value="提交"/>
+    <br/>
+    <!--
+        显示效果：<a href="javascript:a('div文本')">点击</a>
+        a里面的参数需要两个单引号，最前面跟最后面
+    -->
+    <a th:href="'javascript:a(\''+${divText}+'\')'">点击</a>
+    <div th:if="${divText}=='div文本'">等于</div>
+    <div th:text="${num==1}?'1':'3'"></div>
+    <div th:include="includeDemo::fragmentPage"></div>
+<script language="JavaScript">
+    function a(param) {
+        alert(param)
+
+    }
+
+
+</script>
+</body>
+</html>

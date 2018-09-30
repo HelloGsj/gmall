@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.gmall.manage.mapper.SkuSaleAttrValueMapper">
+    <select id="selectSpuSaleAttrListCheckBySku" resultMap="selectSpuSaleAttrListCheckBySkuMap">
+
+
+         select
+                 a.id AS a_id,
+                 a.*,
+                 b.id AS b_id,
+                 b.*,
+                 c.sku_id,
+                 if(c.sku_id,1,0) isChecked
+          from spu_sale_attr a
+	inner join spu_sale_attr_value b
+			on a.sale_attr_id = b.sale_attr_id
+		   and a.spu_id = b.spu_id
+		   and a.spu_id = #{spuId}
+	 left join sku_sale_attr_value c
+			on a.sale_attr_id = c.sale_attr_id
+		   and b.id = c.sale_attr_value_id
+		   and sku_id = #{skuId}
+
+    </select>
+    <resultMap id="selectSpuSaleAttrListCheckBySkuMap" type="com.atguigu.gmall.bean.SpuSaleAttr" autoMapping="true">
+        <result column="a_id" property="id"></result>
+        <collection property="spuSaleAttrValueList" ofType="com.atguigu.gmall.bean.SpuSaleAttrValue" autoMapping="true">
+            <result column="b_id" property="id"></result>
+        </collection>
+    </resultMap>
+
+    <select id="selectSkuSaleAttrValueListBySpu" parameterType="int" resultMap="selectSkuSaleAttrValueListBySpuMap">
+        select
+          a.id sku_id,
+          a.*,
+          b.id sku_sale_attr_value_id,
+          b.*
+          from sku_info a
+    inner join sku_sale_attr_value b
+            on a.id = b.sku_id
+         where a.spu_id = #{spuId}
+    </select>
+    <resultMap id="selectSkuSaleAttrValueListBySpuMap" type="com.atguigu.gmall.bean.SkuInfo" autoMapping="true">
+        <result property="id" column="sku_id"></result>
+        <collection property="skuSaleAttrValueList" ofType="com.atguigu.gmall.bean.SkuSaleAttrValue" autoMapping="true">
+            <result property="id" column="sku_sale_attr_value_id"></result>
+        </collection>
+    </resultMap>
+</mapper>

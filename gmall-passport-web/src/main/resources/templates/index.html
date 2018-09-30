@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="/css/gm1.css"/>
+		<script src="/js/jquery-3.1.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<title>登录</title>
+	</head>
+	<body>
+		<!--顶部logo-->
+
+		<header>
+			<a href="http://www.baidu.com"><img src="/img/logo1.jpg"/></a><p>欢迎登录</p>
+
+		</header>
+
+		<div class="top-2">
+			<div class="top-2a">
+
+				<p> </p>
+			</div>
+		</div>
+
+		<!--大图-->
+		<div class="top-3">
+			<div class="img_1">
+				<img src="/img/5731485aN1134b4f0.jpg"/>
+			</div>
+			<div id="sign">
+
+				<div class="si_cen">
+					<h2 class="act btn1">用户登录</h2>
+                    <span id="spanId" style="color: red;display: none">用户账号或者密码错误</span>
+				</div>
+
+
+				<div class="si_bom1 tab" style="display: block;">
+					<div  class="error">
+						请输入账户名和密码
+					</div>
+
+					<form id="loginForm" action="./login" method="post">
+					<ul>
+						<li class="top_1">
+							<img src="/img/user_03.png" class="err_img1"/>
+
+							<input id="loginName" type="text" name="loginName" placeholder=" 邮箱/用户名/已验证手机"  class="user"/>
+						</li>
+						<li>
+							<img src="/img/user_06.png" class="err_img2"/>
+							<input id="passwd" type="password" name="passwd" placeholder=" 密码" class="password"/>
+
+						</li>
+						<li class="bri">
+							<a href="">忘记密码</a>
+						</li>
+						<li class="ent">
+							<a href="javascript:submitLogin();" class="a">
+								<button id="btn2" type="button" class="btn2"  style="width: 251px">
+									登 &nbsp; &nbsp;录
+								</button>
+							</a>
+						</li>
+
+					</ul>
+						<input type="hidden" id="originUrl" name="originUrl" th:value="${originUrl}"/>
+					</form>
+				</div>
+			<div class="si_out">
+
+				<h5 class="rig">
+						<img src="/img/4de5019d2404d347897dee637895d02b_25.png"/>
+						<span><a href="#">立即注册</a></span>
+					</h5>
+			</div>
+			</div>
+		</div>
+
+
+		<!--底部-->
+
+
+	</body>
+	<script language="JavaScript">
+
+
+			function submitLogin(){
+
+			        //创建一个json的对象
+			        var userInfo = {};
+			        //获取用户名跟密码，并保存到json对象里面
+			        userInfo["loginName"] = $("#loginName").val();
+                    userInfo["passwd"] = $("#passwd").val();
+
+                    $.post("login",userInfo,function(token){
+                        //err由PassportController登录方法返回
+                        if(token != "err"){
+                            //originUrl是被跳转的页面的url
+                            var originUrl = $("#originUrl").val();
+                            //登录有两种情况
+							//1.直接去登录界面登录
+							//  a.该情况没有参数地址 如：http://cart.gmall.com:8083/cartList
+							//2.通过点击其他需要登录的界面而跳转过来的
+							//	a.跳转过来的地址会携带原访问地址
+							//  如：http://cart.gmall.com:8083/addToCart?skuId=1&...
+
+							//indexOf() 方法可返回某个指定的字符串值在字符串中首次出现的位置。
+							//从0开始，没有返回-1
+                            var i = originUrl.indexOf("?");
+                            if(i != -1){
+                                //如果没有找到，证明该地址没有参数
+								window.location.href = originUrl + "&token=" + token;
+							}else {
+                                window.location.href = originUrl + "?token=" + token;
+							}
+						}else {
+                            //否则提示用户名或者密码错误
+                            $("#spanId").attr("style","color: red;display: block");
+						}
+					})
+
+
+			}
+
+
+			var btn2=document.getElementsByClassName('btn2')[0];
+			var user=document.getElementsByClassName('user')[0];
+			var pass=document.getElementsByClassName('password')[0];
+			var err=document.getElementsByClassName('error')[0];
+
+			var err_img1=document.getElementsByClassName('err_img1')[0];
+
+			var err_img2=document.getElementsByClassName('err_img2')[0];
+
+
+
+
+
+			 user.onfocus=function(){
+
+                user.style.border='1px solid #999';
+
+		 }
+
+            pass.onfocus=function(){
+
+                pass.style.border='1px solid #999';
+            }
+            user.onblur=function(){
+
+                user.style.border='1px solid green';
+            }
+            pass.onblur=function(){
+
+                pass.style.border='1px solid green';
+            }
+	</script>
+</html>
